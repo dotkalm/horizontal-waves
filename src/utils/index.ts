@@ -1,1 +1,1 @@
-export { zigZagPath, type Point } from './zigZag';
+export * from './zigZag';

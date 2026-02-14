@@ -1,0 +1,1 @@
+export const BEZIER_APPROXIMATION_FACTOR = 0.3642;
