@@ -17,3 +17,12 @@ export const INITIAL_PATH_ARRAY: Point[][] = Array.from({ length: PATH_COUNT }).
 export const RIDGES_BETWEEN_POINTS = 30;
 
 export const RIDGE_HEIGHT = 1;
+
+export const DESKTOP_CONFIG = {
+  INITIAL_PATH_ARRAY,
+  RIDGES_BETWEEN_POINTS,
+  RIDGE_HEIGHT,
+  VIEWBOX_HEIGHT,
+  VIEWBOX_WIDTH,
+};
+
