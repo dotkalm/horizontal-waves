@@ -22,8 +22,6 @@ export function findPath(pathArray: Point[][], prevSvgPoint: Point, svgPoint: Po
       const t = (pathY - prevSvgPoint.y) / (svgPoint.y - prevSvgPoint.y);
       const crossX = prevSvgPoint.x + t * (svgPoint.x - prevSvgPoint.x);
       const path = pathArray[i];
-      console.log(`crossed path ${i} at x: ${crossX.toFixed(1)}, y: ${pathY.toFixed(1)}`);
-      console.log('path to update:', pathArray[i]);
       const horizontalIndex = findNewIndex(path, crossX);
       return { verticalIndex: i, horizontalIndex };
     }

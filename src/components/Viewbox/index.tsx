@@ -53,7 +53,6 @@ export default function Viewbox() {
     prevSvgPoint = { x: svgPoint.x, y: svgPoint.y };
   }
 
-  console.log('current path array:', pathArray());
   return (
     <StyledSvg
       onMouseDown={() => setIsPressed(true)}
