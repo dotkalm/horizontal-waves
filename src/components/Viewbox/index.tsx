@@ -21,9 +21,9 @@ import {
 
 const CAMERA_WIDTH = 640;
 const CAMERA_HEIGHT = 480;
-const LOW_THRESHOLD = 0.055;
-const HIGH_THRESHOLD = 0.059;
-const GAUSSIAN_BLUR = 1.0;
+const LOW_THRESHOLD = 0.04;
+const HIGH_THRESHOLD = 0.02;
+const GAUSSIAN_BLUR = 1.3;
 
 const StyledSvg = styled.svg`
   width: 100%;
@@ -129,6 +129,7 @@ export default function Viewbox() {
               <path
                 d={zigZagPath(points(), RIDGE_HEIGHT, RIDGES_BETWEEN_POINTS)}
                 fill="rgb(0,20,0,0.15)"
+                //fill="none"
                 id={`zigzag-path-${i}`}
                 opacity={1}
                 stroke-width="0"
