@@ -5,4 +5,5 @@ export * from './scaleEdgePaths';
 export * from './findEdgeIntersections';
 export * from './applyIntersections';
 export * from './extractEdgePaths';
-export * from './processFixture';
+export * from './simplifyPath';
+export * from './processWebcamFrame';
