@@ -1,7 +1,6 @@
 import { createSignal, createRoot } from 'solid-js';
 import type { Point } from '~/types';
-
-const BEZIER_APPROXIMATION_FACTOR = 0.3642;
+import { DESKTOP_CONSTANTS } from '~/constants';
 
 function buildConfig(viewboxWidth: number, viewboxHeight: number, pathCount: number, ridgesBetweenPoints: number, ridgeHeight: number) {
   const VIEWBOX_WIDTH = viewboxWidth;
@@ -17,7 +16,14 @@ function buildConfig(viewboxWidth: number, viewboxHeight: number, pathCount: num
   return { INITIAL_PATH_ARRAY, RIDGES_BETWEEN_POINTS, RIDGE_HEIGHT, VIEWBOX_HEIGHT, VIEWBOX_WIDTH };
 }
 
-const DESKTOP_CONFIG = buildConfig(1440, 1100, 300, 30, 1);
+const DESKTOP_CONFIG = buildConfig(
+  DESKTOP_CONSTANTS.VIEWBOX_WIDTH,
+  DESKTOP_CONSTANTS.VIEWBOX_HEIGHT,
+  DESKTOP_CONSTANTS.PATH_COUNT,
+  DESKTOP_CONSTANTS.RIDGES_BETWEEN_POINTS,
+  DESKTOP_CONSTANTS.RIDGE_HEIGHT,
+);
+
 const MOBILE_CONFIG = buildConfig(1440, 1100, 300, 30, 1);
 const MOBILE_PORTRAIT_CONFIG = buildConfig(1440, 1100, 300, 30, 1);
 

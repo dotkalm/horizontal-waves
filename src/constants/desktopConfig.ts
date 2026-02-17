@@ -8,20 +8,14 @@ export const VIEWBOX_HEIGHT = 800;
 
 export const PATH_COUNT = 20;
 
-export const INITIAL_PATH_ARRAY: Point[][] = Array.from({ length: PATH_COUNT }).map((_,i) => {
-  const spacing = VIEWBOX_HEIGHT / (PATH_COUNT + 1);
-  const y = spacing * (i + 1);
-  return [{ x: 0, y }, { x: VIEWBOX_WIDTH, y }];
-});
-
 export const RIDGES_BETWEEN_POINTS = 1;
 
 export const RIDGE_HEIGHT = 5;
 
-export const DESKTOP_CONFIG = {
-  INITIAL_PATH_ARRAY,
+export const DESKTOP_CONSTANTS = {
   RIDGES_BETWEEN_POINTS,
   RIDGE_HEIGHT,
+  PATH_COUNT,
   VIEWBOX_HEIGHT,
   VIEWBOX_WIDTH,
 };

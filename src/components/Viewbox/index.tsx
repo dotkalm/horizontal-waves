@@ -9,15 +9,9 @@ import {
   zigZagPath,
   processWebcamFrame,
 } from '~/utils';
-import { initWebGL, processFrame, cleanupWebGL } from '~/webgl';
+import { initWebGL, processFrame } from '~/webgl';
+import { deviceConfig } from '~/utils/device';
 import type { Point } from '~/types';
-import {
-  INITIAL_PATH_ARRAY,
-  RIDGES_BETWEEN_POINTS,
-  RIDGE_HEIGHT,
-  VIEWBOX_HEIGHT,
-  VIEWBOX_WIDTH,
-} from '~/constants';
 
 const CAMERA_WIDTH = 640;
 const CAMERA_HEIGHT = 480;
@@ -32,9 +26,10 @@ const StyledSvg = styled.svg`
 `;
 
 export default function Viewbox() {
-  const [pathArray, setPathArray] = createSignal<Point[][]>(INITIAL_PATH_ARRAY);
-  const pathCount = INITIAL_PATH_ARRAY.length;
-  const spacing = VIEWBOX_HEIGHT / (pathCount + 1);
+  const config = () => deviceConfig();
+  const [pathArray, setPathArray] = createSignal<Point[][]>(config().INITIAL_PATH_ARRAY);
+  const pathCount = () => config().INITIAL_PATH_ARRAY.length;
+  const spacing = () => config().VIEWBOX_HEIGHT / (pathCount() + 1);
 
   let videoEl!: HTMLVideoElement;
   let canvasEl!: HTMLCanvasElement;
@@ -81,11 +76,12 @@ export default function Viewbox() {
           LOW_THRESHOLD, HIGH_THRESHOLD, GAUSSIAN_BLUR,
         );
 
+        const c = config();
         const updated = processWebcamFrame(
-          gl, INITIAL_PATH_ARRAY,
+          gl, c.INITIAL_PATH_ARRAY,
           CAMERA_WIDTH, CAMERA_HEIGHT,
-          VIEWBOX_WIDTH, VIEWBOX_HEIGHT,
-          pathCount, spacing,
+          c.VIEWBOX_WIDTH, c.VIEWBOX_HEIGHT,
+          pathCount(), spacing(),
         );
         setPathArray(updated);
       }
@@ -106,32 +102,32 @@ export default function Viewbox() {
   return (
     <>
       <video
-        ref={videoEl}
-        width={CAMERA_WIDTH}
         height={CAMERA_HEIGHT}
-        style={{ display: 'none' }}
         playsinline
+        ref={videoEl}
+        style={{ display: 'none' }}
+        width={CAMERA_WIDTH}
       />
       <canvas
-        ref={canvasEl}
-        width={CAMERA_WIDTH}
         height={CAMERA_HEIGHT}
+        ref={canvasEl}
         style={{ display: 'none' }}
+        width={CAMERA_WIDTH}
       />
       <StyledSvg
         preserveAspectRatio="none"
-        viewBox={`0 0 ${VIEWBOX_WIDTH} ${VIEWBOX_HEIGHT}`}
+        viewBox={`0 0 ${config().VIEWBOX_WIDTH} ${config().VIEWBOX_HEIGHT}`}
       >
         <g id="zigzag-paths">
           <Index each={pathArray()}>
             {(points, i) => (
               <path
-                d={zigZagPath(points(), RIDGES_BETWEEN_POINTS, RIDGE_HEIGHT)}
+                d={zigZagPath(points(), config().RIDGES_BETWEEN_POINTS, config().RIDGE_HEIGHT)}
                 //fill="rgb(0,20,0,.6)"
                 fill="none"
                 id={`zigzag-path-${i}`}
                 opacity={1}
-                stroke-width="10"
+                stroke-width="1"
                 stroke={i % 2 === 0 ? 'currentColor' : 'currentColor'}
               />
             )}
