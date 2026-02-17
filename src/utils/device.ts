@@ -13,7 +13,13 @@ function buildConfig(viewboxWidth: number, viewboxHeight: number, pathCount: num
     return [{ x: 0, y }, { x: VIEWBOX_WIDTH, y }];
   });
 
-  return { INITIAL_PATH_ARRAY, RIDGES_BETWEEN_POINTS, RIDGE_HEIGHT, VIEWBOX_HEIGHT, VIEWBOX_WIDTH };
+  return { 
+    INITIAL_PATH_ARRAY, 
+    RIDGES_BETWEEN_POINTS, 
+    RIDGE_HEIGHT, 
+    VIEWBOX_HEIGHT, 
+    VIEWBOX_WIDTH,
+  };
 }
 
 const DESKTOP_CONFIG = buildConfig(
