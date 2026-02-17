@@ -21,9 +21,9 @@ import {
 
 const CAMERA_WIDTH = 640;
 const CAMERA_HEIGHT = 480;
-const LOW_THRESHOLD = 0.04;
+const LOW_THRESHOLD = 0.02;
 const HIGH_THRESHOLD = 0.02;
-const GAUSSIAN_BLUR = 1.3;
+const GAUSSIAN_BLUR = 1.0;
 
 const StyledSvg = styled.svg`
   width: 100%;
@@ -74,7 +74,6 @@ export default function Viewbox() {
 
     const { programs, framebuffers, textures, buffers } = resources;
 
-    // Animation loop
     const tick = () => {
       if (videoEl.readyState >= videoEl.HAVE_ENOUGH_DATA) {
         processFrame(
@@ -127,12 +126,12 @@ export default function Viewbox() {
           <Index each={pathArray()}>
             {(points, i) => (
               <path
-                d={zigZagPath(points(), RIDGE_HEIGHT, RIDGES_BETWEEN_POINTS)}
-                fill="rgb(0,20,0,0.15)"
-                //fill="none"
+                d={zigZagPath(points(), RIDGES_BETWEEN_POINTS, RIDGE_HEIGHT)}
+                //fill="rgb(0,20,0,.6)"
+                fill="none"
                 id={`zigzag-path-${i}`}
                 opacity={1}
-                stroke-width="0"
+                stroke-width="10"
                 stroke={i % 2 === 0 ? 'currentColor' : 'currentColor'}
               />
             )}
