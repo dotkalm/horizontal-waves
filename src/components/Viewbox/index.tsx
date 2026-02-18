@@ -17,7 +17,7 @@ import type { Point } from '~/types';
 const LOW_THRESHOLD = 0.02;
 const HIGH_THRESHOLD = 0.02;
 const GAUSSIAN_BLUR = 1.0;
-const SCROLL_SPEED = .1;
+const SCROLL_SPEED = .05;
 
 const StyledSvg = styled.svg`
   width: 100%;
@@ -166,8 +166,10 @@ export default function Viewbox() {
       >
         <defs>
           <linearGradient id="zigzag-gradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="blue" />
-            <stop offset="50%" stop-color="pink" />
+            <stop offset="0%" stop-color="rgba(0,0,255,1)" />
+            <stop offset="10%" stop-color="rgba(231, 255, 135, 0.8)" />
+            <stop offset="20%" stop-color="rgba(62, 255, 65, 0.5)" />
+            <stop offset="40%" stop-color="rgba(255, 9, 9, 0.16)" />
             <stop offset="100%" stop-color="transparent" stop-opacity="0" />
           </linearGradient>
         </defs>
@@ -180,7 +182,7 @@ export default function Viewbox() {
                 fill="none"
                 id={`zigzag-path-${i}`}
                 opacity={1}
-                stroke-width="5"
+                stroke-width="2"
                 stroke="url(#zigzag-gradient)"
               />
             )}
