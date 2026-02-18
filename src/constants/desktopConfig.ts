@@ -1,5 +1,3 @@
-import type { Point } from '~/types';
-
 export const BEZIER_APPROXIMATION_FACTOR = 0.3642;
 
 export const VIEWBOX_WIDTH = 1440;

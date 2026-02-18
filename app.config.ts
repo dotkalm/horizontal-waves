@@ -1,8 +1,14 @@
 import { defineConfig } from "@solidjs/start/config";
 import { readFileSync } from "node:fs";
+import { loadEnv } from "vite";
+
+const env = loadEnv('', process.cwd(), 'VITE_');
 
 export default defineConfig({
   vite: {
+    server: {
+      allowedHosts: [env.VITE_ALLOWED_HOST ?? ''],
+    },
     plugins: [
       {
         name: 'glsl-loader',

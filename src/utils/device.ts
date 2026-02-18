@@ -1,6 +1,6 @@
 import { createSignal, createRoot } from 'solid-js';
 import type { Point } from '~/types';
-import { DESKTOP_CONSTANTS } from '~/constants';
+import { DESKTOP_CONSTANTS, MOBILE_CONSTANTS, MOBILE_PORTRAIT_CONSTANTS } from '~/constants';
 
 function buildConfig(viewboxWidth: number, viewboxHeight: number, pathCount: number, ridgesBetweenPoints: number, ridgeHeight: number) {
   const VIEWBOX_WIDTH = viewboxWidth;
@@ -13,7 +13,7 @@ function buildConfig(viewboxWidth: number, viewboxHeight: number, pathCount: num
     return [{ x: 0, y }, { x: VIEWBOX_WIDTH, y }];
   });
 
-  return { 
+  return {
     INITIAL_PATH_ARRAY, 
     RIDGES_BETWEEN_POINTS, 
     RIDGE_HEIGHT, 
@@ -30,8 +30,20 @@ const DESKTOP_CONFIG = buildConfig(
   DESKTOP_CONSTANTS.RIDGE_HEIGHT,
 );
 
-const MOBILE_CONFIG = buildConfig(1440, 1100, 300, 30, 1);
-const MOBILE_PORTRAIT_CONFIG = buildConfig(1440, 1100, 300, 30, 1);
+const MOBILE_CONFIG = buildConfig(
+  MOBILE_CONSTANTS.VIEWBOX_WIDTH,
+  MOBILE_CONSTANTS.VIEWBOX_HEIGHT,
+  MOBILE_CONSTANTS.PATH_COUNT,
+  MOBILE_CONSTANTS.RIDGES_BETWEEN_POINTS,
+  MOBILE_CONSTANTS.RIDGE_HEIGHT,
+);
+const MOBILE_PORTRAIT_CONFIG = buildConfig(
+  MOBILE_PORTRAIT_CONSTANTS.VIEWBOX_WIDTH,
+  MOBILE_PORTRAIT_CONSTANTS.VIEWBOX_HEIGHT,
+  MOBILE_PORTRAIT_CONSTANTS.PATH_COUNT,
+  MOBILE_PORTRAIT_CONSTANTS.RIDGES_BETWEEN_POINTS,
+  MOBILE_PORTRAIT_CONSTANTS.RIDGE_HEIGHT,
+);
 
 const MOBILE_BREAKPOINT = 768;
 
