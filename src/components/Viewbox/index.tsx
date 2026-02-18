@@ -17,7 +17,7 @@ import type { Point } from '~/types';
 const LOW_THRESHOLD = 0.02;
 const HIGH_THRESHOLD = 0.02;
 const GAUSSIAN_BLUR = 1.0;
-const SCROLL_SPEED = .2;
+const SCROLL_SPEED = .1;
 
 const StyledSvg = styled.svg`
   width: 100%;
