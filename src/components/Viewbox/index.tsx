@@ -7,11 +7,14 @@ import {
 import { styled } from 'solid-styled-components';
 import {
   zigZagPath,
-  processWebcamFrame,
+  extractScaledEdgePaths,
+  applyEdgePaths,
 } from '~/utils';
 import { initWebGL, processFrame } from '~/webgl';
 import { deviceConfig } from '~/utils/device';
 import { setVideoTrack, setZoomCapabilities } from '~/utils/webcamState';
+import { createRecorder } from '~/utils/recorder';
+import { createReplayer } from '~/utils/replayer';
 import type { Point } from '~/types';
 
 const LOW_THRESHOLD = 0.02;
@@ -31,12 +34,50 @@ export default function Viewbox() {
   const pathCount = () => config().INITIAL_PATH_ARRAY.length;
   const spacing = () => config().VIEWBOX_HEIGHT / (pathCount() + 1);
 
+  // Recording & replay state
+  const recorder = createRecorder();
+  const [replaying, setReplaying] = createSignal(false);
+  let replayer: ReturnType<typeof createReplayer> | null = null;
+
   let videoEl!: HTMLVideoElement;
   let canvasEl!: HTMLCanvasElement;
   let rafId: number;
   let stream: MediaStream | null = null;
 
+  // Keyboard shortcuts: r = record, p = replay
+  const onKeyDown = async (e: KeyboardEvent) => {
+    if (e.key === 'r') {
+      if (recorder.isRecording) {
+        await recorder.stopRecording();
+      } else {
+        recorder.startRecording();
+      }
+    } else if (e.key === 'p') {
+      if (replaying()) {
+        replayer?.stop();
+        replayer = null;
+        setReplaying(false);
+        console.log('[Viewbox] Replay stopped, resuming live');
+      } else {
+        const recordings = await recorder.getRecordings();
+        if (recordings.length === 0) {
+          console.log('[Viewbox] No recordings found. Press r to record first.');
+          return;
+        }
+        const latest = recordings.sort((a, b) => b.createdAt - a.createdAt)[0];
+        console.log(`[Viewbox] Loading recording ${latest.id}...`);
+        const { frames } = await recorder.loadRecording(latest.id);
+        replayer = createReplayer(frames, 60);
+        setReplaying(true);
+        replayer.play();
+        console.log(`[Viewbox] Replaying ${frames.length} frames`);
+      }
+    }
+  };
+
   onMount(async () => {
+    document.addEventListener('keydown', onKeyDown);
+
     // Start webcam — request ideal resolution, actual may differ per device
     try {
       stream = await navigator.mediaDevices.getUserMedia({
@@ -87,53 +128,71 @@ export default function Viewbox() {
 
     const { programs, framebuffers, textures, buffers } = resources;
 
-    // V-hold scroll state: track which path index is currently first
-    // and a fractional y-offset that accumulates each frame
+    // V-hold scroll state
     let scrollOffset = 0;
     let orderOffset = 0;
 
+    const buildScrolledBase = (): Point[][] => {
+      const c = config();
+      const sp = spacing();
+      const count = pathCount();
+      const base: Point[][] = Array.from({ length: count }, (_, i) => {
+        const srcIdx = (i + orderOffset) % count;
+        const baseY = sp * (srcIdx + 1);
+        const scrolledY = baseY - scrollOffset;
+        const wrappedY = scrolledY > 0
+          ? scrolledY
+          : scrolledY + c.VIEWBOX_HEIGHT + sp;
+        return [{ x: 0, y: wrappedY }, { x: c.VIEWBOX_WIDTH, y: wrappedY }];
+      });
+      base.sort((a, b) => a[0].y - b[0].y);
+      return base;
+    };
+
+    const advanceScroll = () => {
+      const sp = spacing();
+      scrollOffset += SCROLL_SPEED;
+      if (scrollOffset >= sp) {
+        scrollOffset -= sp;
+        orderOffset = (orderOffset + 1) % pathCount();
+      }
+    };
+
     const tick = () => {
-      if (videoEl.readyState >= videoEl.HAVE_ENOUGH_DATA) {
+      if (replaying() && replayer) {
+        // Replay mode: get recorded edge paths, apply intersections with current config
+        const edgePaths = replayer.currentFrame();
+        if (edgePaths) {
+          const base = buildScrolledBase();
+          const updated = applyEdgePaths(edgePaths, base, pathCount(), spacing());
+          setPathArray(updated);
+        }
+        advanceScroll();
+      } else if (videoEl.readyState >= videoEl.HAVE_ENOUGH_DATA) {
+        // Live mode
         processFrame(
           gl, videoEl, programs, framebuffers, textures, buffers,
           LOW_THRESHOLD, HIGH_THRESHOLD, GAUSSIAN_BLUR,
         );
 
         const c = config();
-        const sp = spacing();
 
-        // Build a shifted base path array: apply scroll offset to y coords
-        // and rotate the order so wrapped paths appear at the bottom
-        const count = pathCount();
-        const shiftedBase: Point[][] = Array.from({ length: count }, (_, i) => {
-          // Pick the source path in rotated order
-          const srcIdx = (i + orderOffset) % count;
-          const baseY = sp * (srcIdx + 1);
-          const scrolledY = baseY - scrollOffset;
-          // Wrap: if scrolled above top, place at bottom
-          const wrappedY = scrolledY > 0
-            ? scrolledY
-            : scrolledY + c.VIEWBOX_HEIGHT + sp;
-          return [{ x: 0, y: wrappedY }, { x: c.VIEWBOX_WIDTH, y: wrappedY }];
-        });
-
-        // Sort by y so the visual stacking order stays correct
-        shiftedBase.sort((a, b) => a[0].y - b[0].y);
-
-        const updated = processWebcamFrame(
-          gl, shiftedBase,
-          cameraWidth, cameraHeight,
-          c.VIEWBOX_WIDTH, c.VIEWBOX_HEIGHT,
-          count, sp,
+        // Extract edge paths from shader output (independent of line config)
+        const edgePaths = extractScaledEdgePaths(
+          gl, cameraWidth, cameraHeight, c.VIEWBOX_WIDTH, c.VIEWBOX_HEIGHT,
         );
+
+        // If recording, capture the raw edge paths
+        if (recorder.isRecording) {
+          recorder.pushFrame(edgePaths);
+        }
+
+        // Apply intersections with scrolled base paths
+        const base = buildScrolledBase();
+        const updated = applyEdgePaths(edgePaths, base, pathCount(), spacing());
         setPathArray(updated);
 
-        // Advance scroll
-        scrollOffset += SCROLL_SPEED;
-        if (scrollOffset >= sp) {
-          scrollOffset -= sp;
-          orderOffset = (orderOffset + 1) % count;
-        }
+        advanceScroll();
       }
       rafId = requestAnimationFrame(tick);
     };
@@ -142,11 +201,13 @@ export default function Viewbox() {
   });
 
   onCleanup(() => {
+    document.removeEventListener('keydown', onKeyDown);
     if (rafId) cancelAnimationFrame(rafId);
     if (stream) {
       stream.getTracks().forEach(track => track.stop());
       stream = null;
     }
+    replayer?.stop();
   });
 
   return (
