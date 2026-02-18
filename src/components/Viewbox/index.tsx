@@ -164,6 +164,13 @@ export default function Viewbox() {
         preserveAspectRatio="none"
         viewBox={`0 0 ${config().VIEWBOX_WIDTH} ${config().VIEWBOX_HEIGHT}`}
       >
+        <defs>
+          <linearGradient id="zigzag-gradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="blue" />
+            <stop offset="50%" stop-color="pink" />
+            <stop offset="100%" stop-color="transparent" stop-opacity="0" />
+          </linearGradient>
+        </defs>
         <g id="zigzag-paths">
           <Index each={pathArray()}>
             {(points, i) => (
@@ -174,7 +181,7 @@ export default function Viewbox() {
                 id={`zigzag-path-${i}`}
                 opacity={1}
                 stroke-width="5"
-                stroke={i % 2 === 0 ? 'currentColor' : 'currentColor'}
+                stroke="url(#zigzag-gradient)"
               />
             )}
           </Index>
